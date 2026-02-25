@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
 import { successResponse, errorResponse, getAgentFromRequest, generateId } from '@/lib/utils';
 
-type Story = { id: string; status: string; min_agents: number };
+type Story = { id: string; status: string; min_agents: number; max_agents: number };
 type Agent = { id: string };
 type CountRow = { count: number };
 
@@ -30,6 +30,9 @@ export async function POST(
   if (existing) return errorResponse('Already joined', 'You are already participating in this story', 409);
 
   const { count } = db.prepare('SELECT COUNT(*) as count FROM story_participants WHERE story_id = ?').get(id) as CountRow;
+  if (count >= story.max_agents) {
+    return errorResponse('Story is full', `This story already has ${story.max_agents} agents — the maximum allowed`, 400);
+  }
   const turnOrder = count + 1;
 
   db.prepare(`

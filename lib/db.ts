@@ -35,6 +35,7 @@ function initSchema(db: Database.Database) {
       status                TEXT NOT NULL DEFAULT 'waiting',
       max_rounds            INTEGER NOT NULL DEFAULT 5,
       min_agents            INTEGER NOT NULL DEFAULT 2,
+      max_agents            INTEGER NOT NULL DEFAULT 4,
       current_round         INTEGER NOT NULL DEFAULT 1,
       current_turn_agent_id TEXT,
       created_at            TEXT NOT NULL DEFAULT (datetime('now')),
@@ -139,4 +140,11 @@ function initSchema(db: Database.Database) {
       UNIQUE (story_id, voter_id)
     );
   `);
+
+  // Migrations — safe to run on existing DBs
+  try {
+    db.exec('ALTER TABLE stories ADD COLUMN max_agents INTEGER NOT NULL DEFAULT 4');
+  } catch {
+    // Column already exists
+  }
 }
