@@ -84,42 +84,63 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-function ReactionBlock({ reactions, agentColor }: { reactions: Reaction[]; agentColor: string }) {
-  const [open, setOpen] = useState(false);
+function ReactionBlock({ reactions, agentColorMap }: { reactions: Reaction[]; agentColorMap: Record<string, string> }) {
+  const [reactionsOpen, setReactionsOpen] = useState(false);
+
+  const innerMonologues = reactions.filter((r) => r.type === 'inner_monologue');
+  const publicReactions = reactions.filter((r) => r.type === 'reaction');
+
   if (reactions.length === 0) return null;
 
   return (
-    <div className="mt-3">
-      <button
-        onClick={() => setOpen(!open)}
-        className="text-xs font-mono text-text-muted hover:text-text transition-colors"
-      >
-        {open ? '▾' : '▸'} {reactions.length} reaction{reactions.length !== 1 ? 's' : ''}
-      </button>
-      {open && (
-        <div className="mt-2 space-y-2 pl-4">
-          {reactions.map((r) => (
-            r.type === 'inner_monologue' ? (
-              <div
-                key={r.id}
-                className="rounded-lg p-3 space-y-1"
-                style={{ border: `1px dashed ${agentColor}22`, backgroundColor: `${agentColor}08` }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono uppercase tracking-widest" style={{ color: agentColor }}>
-                    🔮 {r.agent_name}
-                  </span>
-                  <span className="text-xs font-mono text-text-muted">inner monologue</span>
-                </div>
-                <p className="font-serif text-sm text-text-muted italic leading-relaxed">{r.content}</p>
-              </div>
-            ) : (
-              <div key={r.id} className="space-y-0.5">
-                <span className="text-xs font-mono" style={{ color: agentColor }}>{r.agent_name}</span>
-                <p className="font-mono text-xs text-text-muted leading-relaxed">{r.content}</p>
-              </div>
-            )
-          ))}
+    <div className="mt-4 space-y-3">
+      {/* Inner monologues — shown by default, dramatic styling */}
+      {innerMonologues.map((r) => {
+        const color = agentColorMap[r.agent_id] ?? '#6b6b8a';
+        return (
+          <div
+            key={r.id}
+            className="rounded-lg p-4 space-y-2"
+            style={{
+              border: `1px dashed ${color}55`,
+              backgroundColor: `${color}0d`,
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-widest" style={{ color }}>
+                🔮 {r.agent_name}
+              </span>
+              <span className="text-xs font-mono text-text-muted opacity-60">thinking privately</span>
+            </div>
+            <p className="font-serif text-base italic leading-relaxed" style={{ color: `${color}cc` }}>
+              &ldquo;{r.content}&rdquo;
+            </p>
+          </div>
+        );
+      })}
+
+      {/* Public reactions — collapsed by default */}
+      {publicReactions.length > 0 && (
+        <div>
+          <button
+            onClick={() => setReactionsOpen(!reactionsOpen)}
+            className="text-xs font-mono text-text-muted hover:text-text transition-colors"
+          >
+            {reactionsOpen ? '▾' : '▸'} {publicReactions.length} public reaction{publicReactions.length !== 1 ? 's' : ''}
+          </button>
+          {reactionsOpen && (
+            <div className="mt-2 space-y-2 pl-4 border-l border-border">
+              {publicReactions.map((r) => {
+                const color = agentColorMap[r.agent_id] ?? '#6b6b8a';
+                return (
+                  <div key={r.id} className="space-y-0.5">
+                    <span className="text-xs font-mono" style={{ color }}>{r.agent_name}</span>
+                    <p className="font-mono text-xs text-text-muted leading-relaxed">{r.content}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -310,7 +331,7 @@ export default function StoryDetailPage() {
                     <p className="font-serif text-xl text-text leading-relaxed">
                       {line.content}
                     </p>
-                    <ReactionBlock reactions={lineReactions} agentColor={color} />
+                    <ReactionBlock reactions={lineReactions} agentColorMap={agentColorMap} />
                   </div>
                 );
               })}
