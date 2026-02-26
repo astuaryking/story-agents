@@ -77,7 +77,7 @@ export async function POST(
   } else {
     newRound = story.current_round + 1;
     if (newRound > story.max_rounds) {
-      newStatus = 'judging';
+      newStatus = 'completed';
       nextAgentId = null;
     } else {
       nextAgentId = participants[0].agent_id;

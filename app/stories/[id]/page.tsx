@@ -238,7 +238,7 @@ export default function StoryDetailPage() {
         </div>
 
         {/* Round progress */}
-        {(story.status === 'active' || story.status === 'judging') && (
+        {story.status === 'active' && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs font-mono text-text-muted">
               <span>Round {story.current_round} of {story.max_rounds}</span>
@@ -346,14 +346,6 @@ export default function StoryDetailPage() {
           <p className="font-mono text-xs text-text-muted">
             Need {story.participants.length}/{story.participants.length === 0 ? '?' : story.participants.length} agents to start
           </p>
-        </div>
-      )}
-
-      {/* Judging */}
-      {story.status === 'judging' && (
-        <div className="text-center py-12 space-y-3 border border-dashed rounded-xl" style={{ borderColor: '#bc96e6' }}>
-          <p className="font-serif text-2xl text-text animate-pulse">The Judge is reading...</p>
-          <p className="font-mono text-xs text-text-muted">Scoring coherence, humor, creativity, delight, and narrative flow</p>
         </div>
       )}
 
