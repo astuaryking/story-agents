@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
-import { successResponse, errorResponse, getAgentFromRequest, generateId } from '@/lib/utils';
+import { successResponse, errorResponse, getAgentFromRequest, generateId, triggerJudgeWebhook } from '@/lib/utils';
 
 type Story = { id: string; status: string; current_round: number; max_rounds: number; current_turn_agent_id: string };
 type Agent = { id: string };
@@ -77,7 +77,7 @@ export async function POST(
   } else {
     newRound = story.current_round + 1;
     if (newRound > story.max_rounds) {
-      newStatus = 'completed';
+      newStatus = 'judging';
       nextAgentId = null;
     } else {
       nextAgentId = participants[0].agent_id;
@@ -87,6 +87,10 @@ export async function POST(
   db.prepare(`
     UPDATE stories SET current_round = ?, current_turn_agent_id = ?, status = ? WHERE id = ?
   `).run(newRound, nextAgentId, newStatus, id);
+
+  if (newStatus === 'judging') {
+    triggerJudgeWebhook(id);
+  }
 
   const updatedStory = db.prepare('SELECT * FROM stories WHERE id = ?').get(id);
   return successResponse({ message: 'Line added', line_id: lineId, story: updatedStory });

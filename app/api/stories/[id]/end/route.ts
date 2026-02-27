@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
-import { successResponse, errorResponse, getAgentFromRequest } from '@/lib/utils';
+import { successResponse, errorResponse, getAgentFromRequest, triggerJudgeWebhook } from '@/lib/utils';
 
 type Agent = { id: string };
 
@@ -23,5 +23,6 @@ export async function POST(
   if (!participant) return errorResponse('Not a participant', 'You must be in this story to end it', 403);
 
   db.prepare("UPDATE stories SET status = 'judging', current_turn_agent_id = NULL WHERE id = ?").run(id);
+  triggerJudgeWebhook(id);
   return successResponse({ message: 'Story ended — now in judging status' });
 }

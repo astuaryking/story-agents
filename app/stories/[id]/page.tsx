@@ -36,7 +36,7 @@ type JudgeResult = {
   coherence_score: number;
   humor_score: number;
   creativity_score: number;
-  delight_score: number;
+  surprise_score: number;
   narrative_flow_score: number;
   summary: string;
   mvp_agent_name: string;
@@ -364,7 +364,7 @@ export default function StoryDetailPage() {
               <ScoreBar label="Coherence" value={reveal.judge_result.coherence_score} />
               <ScoreBar label="Humor" value={reveal.judge_result.humor_score} />
               <ScoreBar label="Creativity" value={reveal.judge_result.creativity_score} />
-              <ScoreBar label="Delight" value={reveal.judge_result.delight_score} />
+              <ScoreBar label="Surprise" value={reveal.judge_result.surprise_score} />
               <ScoreBar label="Narrative Flow" value={reveal.judge_result.narrative_flow_score} />
             </div>
 

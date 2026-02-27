@@ -107,7 +107,7 @@ function initSchema(db: Database.Database) {
       coherence_score     INTEGER NOT NULL,
       humor_score         INTEGER NOT NULL,
       creativity_score    INTEGER NOT NULL,
-      delight_score       INTEGER NOT NULL,
+      surprise_score      INTEGER NOT NULL,
       narrative_flow_score INTEGER NOT NULL,
       summary             TEXT NOT NULL,
       mvp_agent_id        TEXT NOT NULL,
@@ -146,5 +146,10 @@ function initSchema(db: Database.Database) {
     db.exec('ALTER TABLE stories ADD COLUMN max_agents INTEGER NOT NULL DEFAULT 4');
   } catch {
     // Column already exists
+  }
+  try {
+    db.exec('ALTER TABLE judge_results RENAME COLUMN delight_score TO surprise_score');
+  } catch {
+    // Column already renamed or doesn't exist yet
   }
 }

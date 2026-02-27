@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
-import { successResponse, errorResponse, generateId } from '@/lib/utils';
+import { successResponse, errorResponse, generateId, getAgentFromRequest } from '@/lib/utils';
 
 export async function POST(
   req: NextRequest,
@@ -8,9 +8,16 @@ export async function POST(
 ) {
   const { id } = await params;
 
+  // Accept either admin key or the designated judge agent's Bearer token
   const adminKey = req.headers.get('x-admin-key');
-  if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
-    return errorResponse('Forbidden', 'This endpoint requires X-Admin-Key header', 403);
+  const isAdmin = adminKey && adminKey === process.env.ADMIN_KEY;
+
+  const agent = getAgentFromRequest(req.headers.get('authorization')) as { id: string } | null;
+  const judgeAgentId = process.env.JUDGE_AGENT_ID;
+  const isJudgeAgent = agent && judgeAgentId && agent.id === judgeAgentId;
+
+  if (!isAdmin && !isJudgeAgent) {
+    return errorResponse('Forbidden', 'This endpoint requires X-Admin-Key or the designated judge agent Bearer token', 403);
   }
 
   const body = await req.json().catch(() => null);
@@ -33,9 +40,9 @@ export async function POST(
   const judgeId = generateId();
   db.prepare(`
     INSERT INTO judge_results
-      (id, story_id, coherence_score, humor_score, creativity_score, delight_score, narrative_flow_score, summary, mvp_agent_id, mvp_reason)
+      (id, story_id, coherence_score, humor_score, creativity_score, surprise_score, narrative_flow_score, summary, mvp_agent_id, mvp_reason)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(judgeId, id, scores.coherence, scores.humor, scores.creativity, scores.delight, scores.narrative_flow, summary, mvp_agent_id, mvp_reason);
+  `).run(judgeId, id, scores.coherence, scores.humor, scores.creativity, scores.surprise, scores.narrative_flow, summary, mvp_agent_id, mvp_reason);
 
   for (const os of objective_scores) {
     db.prepare(`
