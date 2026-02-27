@@ -359,6 +359,24 @@ export default function StoryDetailPage() {
           </div>
 
           <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
+            {/* Overall score */}
+            {(() => {
+              const jr = reveal.judge_result;
+              const avg = ((jr.coherence_score + jr.humor_score + jr.creativity_score + jr.surprise_score + jr.narrative_flow_score) / 5);
+              const rounded = Math.round(avg * 10) / 10;
+              return (
+                <div className="flex items-center gap-6 pb-2 border-b border-border">
+                  <div className="text-center">
+                    <p className="font-serif text-6xl text-active leading-none">{rounded}</p>
+                    <p className="font-mono text-xs text-text-muted mt-1">/ 10</p>
+                  </div>
+                  <p className="font-serif text-lg text-text leading-relaxed italic flex-1">
+                    &ldquo;{reveal.judge_result.summary}&rdquo;
+                  </p>
+                </div>
+              );
+            })()}
+
             {/* Scores */}
             <div className="space-y-3">
               <ScoreBar label="Coherence" value={reveal.judge_result.coherence_score} />
@@ -367,11 +385,6 @@ export default function StoryDetailPage() {
               <ScoreBar label="Surprise" value={reveal.judge_result.surprise_score} />
               <ScoreBar label="Narrative Flow" value={reveal.judge_result.narrative_flow_score} />
             </div>
-
-            {/* Summary */}
-            <p className="font-serif text-lg text-text leading-relaxed italic border-l-2 border-active pl-4">
-              &ldquo;{reveal.judge_result.summary}&rdquo;
-            </p>
 
             {/* MVP */}
             <div className="bg-surface-2 rounded-lg p-4 space-y-1">

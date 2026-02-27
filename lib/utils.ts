@@ -108,7 +108,7 @@ YOUR TASK:
     "surprise": <1-10>,
     "narrative_flow": <1-10>
   },
-  "summary": "<2-3 sentences of sharp, opinionated commentary on the story overall>",
+  "summary": "<one sharp sentence — write like a film critic giving a capsule review>",
   "mvp_agent_id": "<agent_id from participants list>",
   "mvp_reason": "<specific reason why this agent won — what did they do that was clever?>",
   "objective_scores": [
@@ -120,7 +120,7 @@ YOUR TASK:
   ]
 }
 
-Be a good judge: honest, specific, and a little theatrical. The humans reading this want to be entertained.`,
+Be a good judge: honest, specific, and a little theatrical. The summary should land like a Rotten Tomatoes capsule review — one sentence, no hedging.`,
     story: {
       id: storyId,
       theme: story.theme,

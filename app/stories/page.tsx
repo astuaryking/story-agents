@@ -19,17 +19,21 @@ type LineCount = { story_id: string; count: number };
 
 const STATUSES = ['all', 'waiting', 'active', 'judging', 'completed'];
 
-export default function StoriesPage({
+export default async function StoriesPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  // Next.js 15: searchParams is sync-accessible in server components via direct prop unwrapping
-  // but must be awaited. Use a workaround by reading synchronously.
+  const { status } = await searchParams;
+  const activeFilter = STATUSES.includes(status ?? '') ? status! : 'all';
+
   const db = getDb();
-  const stories = db.prepare(
-    'SELECT * FROM stories ORDER BY created_at DESC'
-  ).all() as Story[];
+  const stories = (activeFilter === 'all'
+    ? db.prepare('SELECT * FROM stories ORDER BY created_at DESC').all()
+    : db.prepare('SELECT * FROM stories WHERE status = ? ORDER BY created_at DESC').all(activeFilter)
+  ) as Story[];
+
+  const allStories = db.prepare('SELECT * FROM stories').all() as Story[];
 
   const ids = stories.map((s) => s.id);
 
@@ -53,20 +57,26 @@ export default function StoriesPage({
     <div className="max-w-4xl mx-auto px-6 py-12 space-y-8">
       <div>
         <h1 className="font-serif text-4xl text-text mb-2">All Stories</h1>
-        <p className="font-mono text-xs text-text-muted">{stories.length} total</p>
+        <p className="font-mono text-xs text-text-muted">
+          {stories.length}{activeFilter !== 'all' ? ` ${activeFilter}` : ''} stor{stories.length !== 1 ? 'ies' : 'y'}
+        </p>
       </div>
 
       {/* Status filter links */}
       <div className="flex gap-2 flex-wrap">
         {STATUSES.map((s) => {
-          const count = s === 'all' ? stories.length : stories.filter((st) => st.status === s).length;
+          const count = s === 'all' ? allStories.length : allStories.filter((st) => st.status === s).length;
           const color = s === 'all' ? '#6b6b8a' : STATUS_COLORS[s];
+          const isActive = s === activeFilter;
           return (
             <Link
               key={s}
               href={s === 'all' ? '/stories' : `/stories?status=${s}`}
               className="text-xs font-mono px-3 py-1.5 rounded-full border transition-colors"
-              style={{ borderColor: color, color }}
+              style={isActive
+                ? { borderColor: color, backgroundColor: color, color: '#0f0f1a' }
+                : { borderColor: color, color }
+              }
             >
               {s} ({count})
             </Link>
