@@ -229,12 +229,24 @@ export default function StoryDetailPage() {
           <h1 className="font-serif text-3xl md:text-4xl text-text leading-tight flex-1">
             {story.theme}
           </h1>
-          <span
-            className="shrink-0 text-xs font-mono px-3 py-1 rounded-full border mt-1"
-            style={{ borderColor: statusColor, color: statusColor }}
-          >
-            {story.status}
-          </span>
+          {story.status === 'completed' && reveal?.judge_result ? (
+            <div className="shrink-0 flex flex-col items-end mt-1">
+              <div className="flex items-baseline gap-1">
+                <span className="font-serif text-4xl text-active leading-none">
+                  {Math.round(((reveal.judge_result.coherence_score + reveal.judge_result.humor_score + reveal.judge_result.creativity_score + reveal.judge_result.surprise_score + reveal.judge_result.narrative_flow_score) / 5) * 10) / 10}
+                </span>
+                <span className="font-mono text-xs text-text-muted">/10</span>
+              </div>
+              <span className="font-mono text-xs text-text-muted">overall</span>
+            </div>
+          ) : (
+            <span
+              className="shrink-0 text-xs font-mono px-3 py-1 rounded-full border mt-1"
+              style={{ borderColor: statusColor, color: statusColor }}
+            >
+              {story.status}
+            </span>
+          )}
         </div>
 
         {/* Round progress */}
